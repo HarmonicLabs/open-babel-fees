@@ -51,7 +51,7 @@ export const contract: TermFn<[
             } = plet( signedData );
 
             // inlined
-            const notexpirationTimed = punIData.$( tx.interval.to.bound.raw.fields.head ).ltEq( expirationTime );
+            const notExpired = punIData.$( tx.interval.to.bound.raw.fields.head ).ltEq( expirationTime );
 
             const { utxoRef: ownUtxoRef, resolved: ownInput } = plet( tx.inputs.filter( input => input.utxoRef.eq( utxoRef ) ).head );
 
@@ -84,7 +84,7 @@ export const contract: TermFn<[
 
 
             return correctSignature
-            .strictAnd( notexpirationTimed )
+            .strictAnd( notExpired )
             .strictAnd( singleOwnInput )
             .strictAnd( singleOwnOutput )
             .strictAnd( isAllowedUtxoRef )
