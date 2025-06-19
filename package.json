@@ -48,6 +48,7 @@
   },
   "homepage": "https://github.com/HarmonicLabs/pebble#readme",
   "dependencies": {
+    "@harmoniclabs/buildooor": "^0.1.10",
     "@harmoniclabs/crypto": "^0.3.0",
     "@harmoniclabs/obj-utils": "^1.0.0",
     "@harmoniclabs/plu-ts": "^0.9.0",

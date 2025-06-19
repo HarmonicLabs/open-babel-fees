@@ -8,7 +8,7 @@ const SignedData = pstruct({
         tokenName: bs,
         minTokenAmount: int,
         allowedSpendLovelaceAmount: int,
-        expire: PMaybe( int ).type
+        expirationTime: int
     }
 });
 
@@ -47,13 +47,11 @@ export const contract: TermFn<[
                 tokenName,
                 minTokenAmount,
                 allowedSpendLovelaceAmount,
-                expire
+                expirationTime
             } = plet( signedData );
 
             // inlined
-            const notExpired = pmatch( expire )
-            .onJust(({ val: expirationTime }) => punIData.$( tx.interval.to.bound.raw.fields.head ).ltEq( expirationTime ) )
-            .onNothing( _ => pBool( true ) );
+            const notexpirationTimed = punIData.$( tx.interval.to.bound.raw.fields.head ).ltEq( expirationTime );
 
             const { utxoRef: ownUtxoRef, resolved: ownInput } = plet( tx.inputs.filter( input => input.utxoRef.eq( utxoRef ) ).head );
 
@@ -86,7 +84,7 @@ export const contract: TermFn<[
 
 
             return correctSignature
-            .strictAnd( notExpired )
+            .strictAnd( notexpirationTimed )
             .strictAnd( singleOwnInput )
             .strictAnd( singleOwnOutput )
             .strictAnd( isAllowedUtxoRef )
