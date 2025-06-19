@@ -36,8 +36,7 @@ export const contract: TermFn<[
             const correctSignature = (
                 pverifyEd25519
                 .$( ownerPubKey )
-                .$( pserialiseData
-                .$( signedData.as( data ) ) )
+                .$( pserialiseData.$( signedData.as( data ) ) )
                 .$( signature )
             );
 
