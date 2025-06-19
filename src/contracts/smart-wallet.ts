@@ -1,4 +1,4 @@
-import { bool, bs, data, int, passert, pblake2b_224, pBool, PCurrencySymbol, perror, pfn, pisEmpty, plet, pmatch, PPubKey, PScriptContext, pserialiseData, pstruct, PTxOutRef, PubKeyHash, PUnit, pverifyEd25519, TermFn, unit } from "@harmoniclabs/plu-ts";
+import { bool, bs, data, int, passert, pblake2b_224, pBool, PCurrencySymbol, perror, pfn, pisEmpty, plet, pmatch, PMaybe, PPubKey, PScriptContext, pserialiseData, pstruct, PTxOutRef, PubKeyHash, punIData, PUnit, pverifyEd25519, TermFn, unit } from "@harmoniclabs/plu-ts";
 
 
 const SignedData = pstruct({
@@ -8,6 +8,7 @@ const SignedData = pstruct({
         tokenName: bs,
         minTokenAmount: int,
         allowedSpendLovelaceAmount: int,
+        expire: PMaybe( int ).type
     }
 });
 
@@ -45,8 +46,14 @@ export const contract: TermFn<[
                 tokenPolicy,
                 tokenName,
                 minTokenAmount,
-                allowedSpendLovelaceAmount
+                allowedSpendLovelaceAmount,
+                expire
             } = plet( signedData );
+
+            // inlined
+            const notExpired = pmatch( expire )
+            .onJust(({ val: expirationTime }) => punIData.$( tx.interval.to.bound.raw.fields.head ).ltEq( expirationTime ) )
+            .onNothing( _ => pBool( true ) );
 
             const { utxoRef: ownUtxoRef, resolved: ownInput } = plet( tx.inputs.filter( input => input.utxoRef.eq( utxoRef ) ).head );
 
@@ -79,6 +86,7 @@ export const contract: TermFn<[
 
 
             return correctSignature
+            .strictAnd( notExpired )
             .strictAnd( singleOwnInput )
             .strictAnd( singleOwnOutput )
             .strictAnd( isAllowedUtxoRef )
